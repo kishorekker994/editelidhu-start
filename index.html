@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://*.app.github.dev; connect-src https://api.github.com; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#07070D">
+  <meta name="apple-mobile-web-app-title" content="EditElidhu">
+  <title>Start EditElidhu</title>
+  <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <style>
+    :root { color-scheme: dark; --bg: #07070D; --card: #12121c; --line: #26263a; --text: #f2f2f7; --muted: #9a9ab0; --accent: #7c5cff; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100svh; display: grid; place-items: center; background: var(--bg); color: var(--text);
+      font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding: 24px; }
+    main { width: min(420px, 100%); background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 28px 24px; text-align: center; }
+    img.logo { width: 72px; height: 72px; border-radius: 16px; }
+    h1 { font-size: 1.4rem; margin: 12px 0 4px; }
+    #status { color: var(--muted); min-height: 3em; margin: 8px 0 20px; }
+    button, .btn { display: block; width: 100%; min-height: 48px; border-radius: 12px; border: 1px solid var(--line); font: inherit; font-weight: 600;
+      background: transparent; color: var(--text); cursor: pointer; margin-top: 10px; text-decoration: none; line-height: 46px; }
+    .primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    input { width: 100%; min-height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: inherit; padding: 0 14px; }
+    label { display: block; text-align: left; color: var(--muted); font-size: .9rem; margin-bottom: 6px; }
+    a { color: var(--accent); }
+    small { display: block; color: var(--muted); margin-top: 16px; font-size: .8rem; }
+    .spin { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--muted); border-top-color: transparent; border-radius: 50%;
+      animation: r 0.8s linear infinite; vertical-align: -2px; margin-right: 8px; }
+    @keyframes r { to { transform: rotate(360deg); } }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main>
+    <img class="logo" src="icon-192.png" alt="">
+    <h1>EditElidhu</h1>
+    <p id="status">Loading…</p>
+
+    <form id="setup" hidden>
+      <label for="token">GitHub token (needs only the <b>codespace</b> permission)</label>
+      <input id="token" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ghp_…" required>
+      <button class="primary" type="submit">Save on this phone</button>
+      <a class="btn" id="create-token" target="_blank" rel="noopener noreferrer"
+         href="https://github.com/settings/tokens/new?scopes=codespace&amp;description=EditElidhu%20start%20button">Create a token on GitHub</a>
+      <small>The token stays in this phone's browser only. It can start and stop your codespaces.</small>
+    </form>
+
+    <div id="actions" hidden>
+      <a class="btn primary" id="open" href="#">Open EditElidhu</a>
+      <button id="stop" type="button">Stop codespace (save hours)</button>
+    </div>
+    <button id="retry" type="button" hidden>Try again</button>
+    <small id="forget-wrap" hidden><a href="#" id="forget">Use a different token</a></small>
+  </main>
+  <script src="start.js"></script>
+</body>
+</html>
