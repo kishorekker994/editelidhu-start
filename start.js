@@ -171,3 +171,21 @@ if (token) {
   say("One-time setup: paste a GitHub token to connect this phone.");
   view({ setup: true });
 }
+
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+
+let installPrompt = null;
+addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  installPrompt = e;
+  $("install").hidden = false;
+});
+addEventListener("appinstalled", () => { $("install").hidden = true; });
+$("install").addEventListener("click", async () => {
+  $("install").hidden = true;
+  installPrompt?.prompt();
+  await installPrompt?.userChoice;
+  installPrompt = null;
+});
+const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+$("ios-hint").hidden = standalone || !/iPhone|iPad|iPod/.test(navigator.userAgent);

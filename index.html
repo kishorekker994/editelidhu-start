@@ -3,11 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://*.app.github.dev; connect-src https://api.github.com; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' https://*.app.github.dev; connect-src 'self' https://api.github.com; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
   <meta name="referrer" content="no-referrer">
   <meta name="theme-color" content="#07070D">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="EditElidhu">
   <title>Start EditElidhu</title>
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <style>
@@ -54,6 +58,8 @@
     </div>
     <button id="retry" type="button" hidden>Try again</button>
     <small id="forget-wrap" hidden><a href="#" id="forget">Use a different token</a></small>
+    <button id="install" type="button" hidden>Install as an app</button>
+    <small id="ios-hint" hidden>To install on iPhone: tap Share, then “Add to Home Screen”. Open it from the new icon and paste your token there once.</small>
   </main>
   <script src="start.js"></script>
 </body>
