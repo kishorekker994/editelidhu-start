@@ -33,12 +33,6 @@
     .spin { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--muted); border-top-color: transparent; border-radius: 50%;
       animation: r 0.8s linear infinite; vertical-align: -2px; margin-right: 8px; }
     @keyframes r { to { transform: rotate(360deg); } }
-    .usage { margin-top: 18px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; text-align: left; }
-    .usage p { margin: 4px 0; }
-    .usage .big { font-weight: 600; }
-    .usage .faint { color: var(--muted); font-size: .85rem; }
-    .usage .bar { height: 8px; border-radius: 99px; background: var(--line); margin: 8px 0; overflow: hidden; }
-    .usage .bar::before { content: ""; display: block; height: 100%; width: var(--used); background: var(--accent); }
     [hidden] { display: none !important; }
   </style>
 </head>
@@ -49,12 +43,12 @@
     <p id="status">Loading…</p>
 
     <form id="setup" hidden>
-      <label for="token">GitHub token (with the <b>codespace</b> and <b>user</b> permissions)</label>
+      <label for="token">GitHub token (needs only the <b>codespace</b> permission)</label>
       <input id="token" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ghp_…" required>
       <button class="primary" type="submit">Save on this phone</button>
       <a class="btn" id="create-token" target="_blank" rel="noopener noreferrer"
-         href="https://github.com/settings/tokens/new?scopes=codespace,user&amp;description=EditElidhu%20start%20button">Create a token on GitHub</a>
-      <small>The token stays in this phone's browser only. It can start and stop your codespaces and read your free hours.</small>
+         href="https://github.com/settings/tokens/new?scopes=codespace&amp;description=EditElidhu%20start%20button">Create a token on GitHub</a>
+      <small>The token stays in this phone's browser only. It can start and stop your codespaces.</small>
     </form>
 
     <div id="actions" hidden>
@@ -63,7 +57,6 @@
       <button id="stop" type="button">Stop codespace (save hours)</button>
     </div>
     <button id="retry" type="button" hidden>Try again</button>
-    <section id="usage" class="usage" aria-live="polite" hidden></section>
     <small id="forget-wrap" hidden><a href="#" id="forget">Use a different token</a></small>
     <button id="install" type="button" hidden>Install as an app</button>
     <small id="ios-hint" hidden>To install on iPhone: tap Share, then “Add to Home Screen”. Open it from the new icon and paste your token there once.</small>
