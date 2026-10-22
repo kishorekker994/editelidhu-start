@@ -85,6 +85,7 @@ function showRunning() {
 
 async function start() {
   cancelled = false;
+  $("editor").hidden = true;
   view({ actions: false });
   say("Checking your codespace…", true);
   codespace = await findCodespace();
@@ -105,7 +106,13 @@ async function start() {
       await gh(`/user/codespaces/${codespace.name}/start`, "POST");
     }
     if (codespace.state === "Available") {
-      say(`Starting EditElidhu… ${secs}s`, true);
+      if (secs < 90) {
+        say(`Starting EditElidhu… ${secs}s`, true);
+      } else {
+        say(`Still waiting for the app (${secs}s). If it never opens, open the codespace editor and run ./run.sh in its terminal.`, true);
+        $("editor").href = codespace.web_url;
+        $("editor").hidden = false;
+      }
       if (await appReady()) {
         if (cancelled) return;
         say("Opening EditElidhu…", true);
