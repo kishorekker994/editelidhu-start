@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE = "ee-start-v1";
+const CACHE = "ee-start-v2";
 const SHELL = ["./", "index.html", "start.js", "manifest.webmanifest", "icon-192.png", "icon-512.png", "maskable-512.png",
   "apple-touch-icon.png", "favicon-32.png"];
 

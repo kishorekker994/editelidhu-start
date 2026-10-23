@@ -11,6 +11,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let token = localStorage.getItem(KEY) || "";
 let codespace = null;
 let cancelled = false;
+let busy = false;
+let runs = 0;
+let lastTask = null;
 
 function say(text, spinning = false) {
   const parts = [document.createTextNode(text)];
@@ -22,8 +25,16 @@ function say(text, spinning = false) {
   $("status").replaceChildren(...parts);
 }
 
-function view({ setup = false, actions = false, retry = false } = {}) {
+// state: off | busy | on | error
+function pill(state, text) {
+  $("pill").dataset.state = state;
+  $("pill-text").textContent = text;
+  $("pill").hidden = false;
+}
+
+function view({ setup = false, idle = false, actions = false, retry = false } = {}) {
   $("setup").hidden = !setup;
+  $("idle").hidden = !idle;
   $("actions").hidden = !actions;
   $("retry").hidden = !retry;
   $("forget-wrap").hidden = setup || !token;
@@ -79,17 +90,60 @@ function appReady() {
 function showRunning() {
   $("open").href = appUrl();
   $("open").hidden = false;
-  say("EditElidhu is running.");
+  pill("on", "Running");
+  say("EditElidhu is running. Stop it when you're done to save your free hours.");
   view({ actions: true });
+}
+
+const STARTING = ["Starting", "Queued", "Provisioning", "Awaiting", "Rebuilding", "Updating"];
+
+function showIdle() {
+  const s = codespace.state;
+  const on = s === "Available" || STARTING.includes(s);
+  $("start").textContent = on ? "Open when ready" : "Start EditElidhu";
+  if (s === "Shutdown") {
+    pill("off", "Stopped");
+    say("Your codespace is stopped, so no free hours are being used. Tap Start when you want to edit.");
+  } else if (s === "ShuttingDown") {
+    pill("busy", "Stopping");
+    say("Your codespace is stopping. You can start it again when you need it.");
+  } else if (STARTING.includes(s)) {
+    pill("busy", "Starting");
+    say("Your codespace is already starting (from another device or tab).");
+  } else if (s === "Available") {
+    pill("busy", "Codespace on");
+    say("The codespace is on, but EditElidhu isn't answering yet.");
+  } else {
+    pill("off", s);
+    say(`Your codespace is “${s}”. Tap Start to try starting it.`);
+  }
+  view({ idle: true });
+}
+
+// Read-only: never starts anything.
+async function check() {
+  cancelled = true;
+  $("editor").hidden = true;
+  view();
+  pill("busy", "Checking");
+  say("Checking your codespace…", true);
+  codespace = await findCodespace();
+  if (codespace.state === "Available" && (await appReady())) return showRunning();
+  showIdle();
 }
 
 async function start() {
   cancelled = false;
   $("editor").hidden = true;
   view({ actions: false });
+  pill("busy", "Starting");
   say("Checking your codespace…", true);
   codespace = await findCodespace();
-  if (codespace.state === "Available" && (await appReady())) return showRunning();
+  if (codespace.state === "Available" && (await appReady())) {
+    say("Opening EditElidhu…", true);
+    location.replace(appUrl());
+    return;
+  }
 
   $("open").href = appUrl();
   $("actions").hidden = false;
@@ -130,21 +184,27 @@ async function start() {
 async function stop() {
   cancelled = true;
   view();
+  pill("busy", "Stopping");
   say("Stopping the codespace…", true);
   codespace = codespace || (await findCodespace());
   await gh(`/user/codespaces/${codespace.name}/stop`, "POST");
+  codespace = { ...codespace, state: "Shutdown" };
+  showIdle();
   say("Stopped. No Codespaces hours are being used now.");
-  $("retry").textContent = "Start again";
-  view({ retry: true });
 }
 
-function run(task) {
+function run(task, { force = false } = {}) {
+  if (busy && !force) return;
+  const id = ++runs;
+  busy = true;
+  lastTask = task;
   task().catch((err) => {
+    if (id !== runs) return;
     if (!(err instanceof Stop)) console.error(err);
+    pill("error", "Problem");
     say(err instanceof Stop ? err.message : "Something went wrong. Try again.");
-    $("retry").textContent = "Try again";
     view({ setup: !token, retry: !!token });
-  });
+  }).finally(() => { if (id === runs) busy = false; });
 }
 
 $("setup").addEventListener("submit", (e) => {
@@ -153,20 +213,26 @@ $("setup").addEventListener("submit", (e) => {
   if (!token) return;
   localStorage.setItem(KEY, token);
   $("token").value = "";
-  run(start);
+  run(check);
 });
-$("stop").addEventListener("click", () => run(stop));
-$("retry").addEventListener("click", () => run(start));
+$("start").addEventListener("click", () => run(start));
+$("stop").addEventListener("click", () => run(stop, { force: true }));
+$("retry").addEventListener("click", () => run(lastTask || check));
 $("forget").addEventListener("click", (e) => {
   e.preventDefault();
   token = "";
   localStorage.removeItem(KEY);
+  $("pill").hidden = true;
   say("Paste a GitHub token to connect this phone.");
   view({ setup: true });
 });
+// Coming back to the page refreshes the status (still read-only).
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && token && $("setup").hidden && (!$("idle").hidden || !$("open").hidden)) run(check);
+});
 
 if (token) {
-  run(start);
+  run(check);
 } else {
   say("One-time setup: paste a GitHub token to connect this phone.");
   view({ setup: true });
